@@ -68,9 +68,9 @@ $router->sap_id = $data->sap_id;
 $router->internet_host_name = $data->internet_host_name;
 $router->client_ip_address = $data->client_ip_address;
 $router->mac_address = $data->mac_address;
-if($router->ipExists()){
+if(!$router->ipExists()){
   http_response_code(507);
-  echo json_encode(array("message" => "Duplicate Ip Address."));
+  echo json_encode(array("message" => "Ip does not exists in system."));
   return;
 }
 

@@ -44,15 +44,9 @@ class Router{
         $stmt->bindParam(':internet_host_name', $this->internet_host_name);
         $stmt->bindParam(':client_ip_address', $this->client_ip_address);
         $stmt->bindParam(':mac_address', $this->mac_address);
-
-
-
-
-        // execute the query, also check if query was successful
         if($stmt->execute()){
             return true;
         }
-
         return false;
     }
 
@@ -97,6 +91,38 @@ class Router{
 
         // return false if email does not exist in the database
         return false;
+      }
+
+      function update(){
+
+          // insert query
+          $query = "UPDATE  " . $this->table_name . "
+                    SET
+                      sap_id = :sap_id,
+                      internet_host_name = :internet_host_name,
+                      mac_address = :mac_address
+                    WHERE client_ip_address=?";
+
+          // prepare the query
+          $stmt = $this->conn->prepare($query);
+
+          // sanitize
+          $this->sap_id=htmlspecialchars(strip_tags($this->sap_id));
+          $this->internet_host_name=htmlspecialchars(strip_tags($this->internet_host_name));
+          $this->client_ip_address=htmlspecialchars(strip_tags($this->client_ip_address));
+          $this->mac_address=htmlspecialchars(strip_tags($this->mac_address));
+
+          // bind the values
+          $stmt->bindParam(':sap_id', $this->sap_id);
+          $stmt->bindParam(':internet_host_name', $this->internet_host_name);
+          //$stmt->bindParam(':client_ip_address', $this->client_ip_address);
+          $stmt->bindParam(':mac_address', $this->mac_address);
+
+          $stmt->bindParam(1, $this->client_ip_address);
+          if($stmt->execute()){
+              return true;
+          }
+          return false;
       }
 }
 ?>
