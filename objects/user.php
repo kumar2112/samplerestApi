@@ -93,4 +93,26 @@ function emailExists(){
     // return false if email does not exist in the database
     return false;
   }
+
+  public function checkUnique($column_name,$columnval){
+      $query = "SELECT ". $column_name."
+            FROM " . $this->table_name . "
+            WHERE $column_name = ?
+            LIMIT 0,1";
+      $stmt = $this->conn->prepare( $query );
+
+      // sanitize
+      $columnval=htmlspecialchars(strip_tags($columnval));
+      $stmt->bindParam(1, $this->email);
+
+      // execute the query
+      $stmt->execute();
+
+      // get number of rows
+      $num = $stmt->rowCount();
+      if($num>0){
+         return false;
+      }
+      return true;
+  }
 }

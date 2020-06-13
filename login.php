@@ -7,7 +7,7 @@ header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers
 
 // files needed to connect to database
 include_once 'config/database.php';
-include_once 'config/core.php';
+//include_once 'config/core.php';
 include_once 'objects/user.php';
 
 

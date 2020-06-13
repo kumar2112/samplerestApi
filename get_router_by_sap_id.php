@@ -27,7 +27,7 @@ if(empty($data->jwt)){
     return;
 }
 try {
-    $decodedToken = JWT::decode($jwt, $key, array('HS256'));
+    $decodedToken = JWT::decode($data->jwt, $key, array('HS256'));
     if(empty($decodedToken)){
       http_response_code(506);
       echo json_encode(array("message" => "Invalid access token."));
@@ -41,59 +41,21 @@ try {
     ));
     return;
 }
-if(isset($data->sap_id)){
-    http_response_code(501);
-    echo json_encode(array("message" => "Sap Id is required."));
-    return;
-}
-if(isset($data->internet_host_name)){
-    http_response_code(502);
-    echo json_encode(array("message" => "Host name is required."));
-    return;
-}
 if(empty($data->client_ip_address)){
     http_response_code(503);
     echo json_encode(array("message" => "Ip address is required."));
     return;
 }
-if(isset($data->mac_address)){
-    http_response_code(504);
-    echo json_encode(array("message" => "Mac address is required."));
+if(!$router->checkUnique('sap_id',$data->sap_id)){
+    http_response_code(510);
+    echo json_encode(array("message" => "No record found for given sap id."));
     return;
 }
 
-
 $router=new Router($db);
-if(isset($data->mac_address)){
-    $router->sap_id = $data->sap_id;
-}
-if(isset($data->mac_address)){
-    $router->internet_host_name = $data->internet_host_name;
-}
-
 $router->client_ip_address = $data->client_ip_address;
-if(isset($data->mac_address)){
-    $router->mac_address = $data->mac_address;
-}
-if(!$router->ipExists()){
-  http_response_code(507);
-  echo json_encode(array("message" => "No matched record found for given api.."));
-  return;
-}
-
-$routerIsUpdated=$router->update();
-
-if($routerIsUpdated){
+if($router->softDeleteRouter()){
   http_response_code(200);
-  echo json_encode(array( "code"=>200,
-                          "status"=>"success",
-                          "message"=>"Router added successfully.",
-                          "data"=>array(
-                                 'sapId'=>$router->sap_id,
-                                 'internet_host_name'=>$router->internet_host_name,
-                                 'client_ip_address'=>$router->client_ip_address,
-                                 'mac_address'=>$router->mac_address
-                           )
-                        ));
+  echo json_encode(array("message" => "Router deactivated success fully."));
   return;
 }

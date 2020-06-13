@@ -21,13 +21,14 @@ $db = $database->getConnection();
 
 $data = json_decode(file_get_contents("php://input"));
 
+
 if(empty($data->jwt)){
     http_response_code(505);
     echo json_encode(array("message" => "Access token is required."));
     return;
 }
 try {
-    $decodedToken = JWT::decode($jwt, $key, array('HS256'));
+    $decodedToken = JWT::decode($data->jwt, $key, array('HS256'));
     if(empty($decodedToken)){
       http_response_code(506);
       echo json_encode(array("message" => "Invalid access token."));
@@ -37,7 +38,8 @@ try {
     http_response_code(506);
     echo json_encode(array(
         "message" => "Access denied .",
-        "error" => $e->getMessage()
+        //"error" => $e->getMessage()
+        "error" => "Invalid token"
     ));
     return;
 }
@@ -63,14 +65,42 @@ if(empty($data->mac_address)){
 }
 
 
+
+
 $router=new Router($db);
 $router->sap_id = $data->sap_id;
 $router->internet_host_name = $data->internet_host_name;
 $router->client_ip_address = $data->client_ip_address;
 $router->mac_address = $data->mac_address;
-if($router->ipExists()){
-  http_response_code(507);
-  echo json_encode(array("message" => "Duplicate Ip Address."));
+
+// if($router->ipExists()){
+//   http_response_code(507);
+//   echo json_encode(array("message" => "Ip address should be unique."));
+//   return;
+// }
+// // if($router->ipExists()){
+//   http_response_code(507);
+//   echo json_encode(array("message" => "Ip address should be unique."));
+//   return;
+// }
+if($router->checkUnique('sap_id',$data->sap_id)){
+  http_response_code(508);
+  echo json_encode(array("message" => "Sap id should be unique."));
+  return;
+}
+if($router->checkUnique('internet_host_name',$data->internet_host_name)){
+  http_response_code(509);
+  echo json_encode(array("message" => "Host name should be unique."));
+  return;
+}
+if($router->checkUnique('client_ip_address',$data->client_ip_address)){
+  http_response_code(510);
+  echo json_encode(array("message" => "Ip Address should be unique."));
+  return;
+}
+if($router->checkUnique('mac_address',$data->mac_address)){
+  http_response_code(511);
+  echo json_encode(array("message" => "Mac address should be unique."));
   return;
 }
 
